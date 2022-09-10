@@ -168,7 +168,108 @@ Check the modification in the <walkthrough-editor-open-file
     configuration
 </walkthrough-editor-open-file> file... Beautiful!
 ## Try the console
+First, go to the basic repo
+```bash
+cd basic
+```
+and redeploy your infrastructrue
+```bash
+terraform init
+terraform apply
+```
+***
+Time to play with the console mode :
+
+1. check our variable
+```bash
+echo 'var.vpc_name' | terraform console
+```
+2. check the compute engine labels
+```bash
+echo 'resource.google_compute_instance.default.labels' | terraform console
+```
+3. check the network name
+```bash
+echo 'resource.google_compute_network.vpc_network.name' | terraform console
+```
 ## Import some resource
+First, go to the basic repo
+```bash
+cd basic
+```
+and [create a resource manually](https://console.cloud.google.com/compute/instances?project=<walkthrough-project-name/>) that you will name `test-instance-1` and deploy it in `europe-west1-b`
+***
+
+Add a new `google_compute_instance` in <walkthrough-editor-open-file
+    filePath="cloudshell_open/terraform-tuto/basic/main.tf">
+    main.tf
+</walkthrough-editor-open-file>
+
+```tf
+resource "google_compute_instance" "by-hand" {)
+```
+
+**Notice :** See that we change the `label name`; it is now `by-hand`
+
+Let's import the resource :
+```bash
+terraform import google_compute_instance.by-hand <walkthrough-project-name/>/europe-west1-b/test-instance-1
+```
+***
+Let's make some changes :
+```tf
+resource "google_compute_instance" "by-hand" {
+  machine_type = "e2-medium"
+  allow_stopping_for_update = true
+  name = "test-instance-1"
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+  network_interface {
+    network    = google_compute_network.vpc_network.self_link
+    subnetwork = google_compute_subnetwork.custom_subnet.self_link
+
+    access_config {
+      //   Ephemeral   IP
+    }
+  }
+}
+```
+
+and apply it
+```bash
+terraform apply
+```
+
+If you have time, you can try to set `allow_stopping_for_update` to false and change the `machine_type` to `f1-micro`
+```tf
+resource "google_compute_instance" "by-hand" {
+  machine_type = "f1-micro"
+  allow_stopping_for_update = false
+  name = "test-instance-1"
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+  network_interface {
+    network    = google_compute_network.vpc_network.self_link
+    subnetwork = google_compute_subnetwork.custom_subnet.self_link
+
+    access_config {
+      //   Ephemeral   IP
+    }
+  }
+```
+
+and apply it
+```bash
+terraform apply
+```
+
+Terraform is now managing the instance
 ## Configure backend
 
 ## Félicitations !
