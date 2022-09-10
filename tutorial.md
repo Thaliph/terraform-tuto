@@ -18,8 +18,15 @@ In this tutorial we will see :
     - use pre-commit & SAST tools
 
 ## Basic
-<walkthrough-editor-open-file filePath="basic/">
-</walkthrough-editor-open-file>
+### Use a project
+
+First we need to authenticate and access our project
+```bash
+gcloud auth login
+```
+```bash
+./setup_project.sh PROJECT_ID
+```
 
 ### Deploy resource
 
