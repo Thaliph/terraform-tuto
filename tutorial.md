@@ -345,7 +345,96 @@ Summary
 - use expression
 - compare remote state datasource with data source
 ## Create a module
+First, go to the working_dir repo
+```bash
+cd working_dir
+```
+***
 
+Create a new folder `modules/backend`
+```bash
+mkdir modules
+mkdir modules/backend
+```
+
+Move your `main.tf`, `outputs.tf` and `variables.tf` in it
+```bash
+for file in  "main.tf" "outputs.tf" "variables.tf"
+do
+    mv $file modules/backend
+done
+```
+
+Create a variable for the `machine_type` of your google_compute_instance resource
+```bash
+find . -type f -name "main.tf" -exec sed -i "s/machine_type.*/machine_type = var\.instance_type/g" {} +
+echo "variable \"instance_type\" {
+  type        = string
+  description = \"Machine type e.g. e2-medium or custom-NUMBER_OF_CPUS-AMOUNT_OF_MEMORY_MB\"
+}
+"  >> modules/backend/variables.tf
+```
+
+In the root project, create a `main.tf` and create a module named `backend`.
+It has a `./modules/backend` source, `f1-micro` as `instance_type`.
+
+```bash
+touch main.tf
+echo "module \"server\" {
+  source        = \"./modules/backend\"
+  instance_type = \"f1-micro\"
+}
+" > main.tf
+```
+
+**Notice :** We could specify `vpc_name` in our `backend` module but the variable has a <walkthrough-editor-open-file
+    filePath="cloudshell_open/terraform-tuto/working_dir/modules/backend/versions.tf">
+    default value
+</walkthrough-editor-open-file>
+
+**Tips :** you can use the command `fmt` with the option `-recursive` to format folders too :
+```bash
+terraform fmt -recursive
+```
+
+Now, we have to execute the `init` command because we added a `module`
+```bash
+terraform init
+```
+
+and we can see what it will do with and apply the change
+```bash
+terraform apply
+```
+
+We can use outputs to have information about our resources.
+Let's try to get the `internal ip` used by our compute instance.
+
+1. get the network_id from the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/modules/backend/outputs.tf">module backend</walkthrough-editor-open-file>
+```bash
+echo "output \"network_ip\" {
+  value = resource.google_compute_instance.default.network_interface.0.network_ip
+}" > modules/backend/outputs.tf
+```
+
+2. Create an `outputs.tf` file in the root project add show the value network_ip from the `backend` module
+```bash
+touch outputs.tf
+echo "output \"network_ip\" {
+  value = module.backend.network_ip
+}" > outputs.tf
+```
+
+3. Now, you can apply :
+```bash
+terraform apply
+```
+You can see a new line in the console that look like this:
+```bash
+Outputs:
+
+network_ip = "X.X.X.X"
+```
 ## Félicitations !
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
