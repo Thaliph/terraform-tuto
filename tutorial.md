@@ -342,6 +342,12 @@ cat default.tfstate
 
 **Notice :** If you have press `yes`, the state is copied and the `cat` command will show your actual state.
 
+To clean your folder : 
+```bash
+rm -rf .terraform*
+rm -rf *.tfstate*
+```
+
 ## Advance
 Summary
 - create a module
@@ -544,6 +550,37 @@ You can apply to create two instances. You will have a new output with a list of
 terraform apply
 ```
 
+See you dev and prod VMs in : https://console.cloud.google.com/compute/instances?project=<walkthrough-project-name/>
+
+## Compare remote state datasource with data source
+TODO
+## Automation    
+- deploy cloudbuild
+- use pre-commit & SAST tools
+# Deploy cloudbuild
+
+<walkthrough-enable-apis apis="cloudbuild.googleapis.com sourcerepo.googleapis.com">Activate cloudbuild & sourcerepo</walkthrough-enable-apis>
+
+Create a git repo
+```bash
+gcloud source repos create my-iac
+```
+
+Clone a git repo
+```bash
+gcloud source repos clone my-iac
+```
+Move your `working_dir` to you git repo
+
+```bash
+for i in $(ls working_dir)
+do
+    mv working_dir/$i my-iac/
+done
+```
+
+
+# Use pre-commit & SAST tools
 ## Félicitations !
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>

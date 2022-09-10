@@ -1,0 +1,37 @@
+###########################################
+############# Cloud build #################
+###########################################
+
+# gcloud builds submit --config=cloudbuild.yaml --substitutions=TAG_NAME="prod.1.0.3"
+
+steps:
+
+- id: 'tag/branch name'
+  name: 'alpine'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+      if [[ $BRANCH_NAME = "" ]]; then
+        echo "***********************"
+        echo "TAG NAME $TAG_NAME"
+        echo "***********************"
+      else
+        echo "***********************"
+        echo "BRANCH NAME $BRANCH_NAME"
+        echo "***********************"
+      fi
+
+# [START tf-validate]
+- id: 'tf validate'
+  name: 'hashicorp/terraform:latest'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+      cd terraform_training/TP10
+      terraform init
+      terraform validate
+# [END tf-validate]
+
+tags: ['terraform', 'default', 'tf-training']

@@ -1,0 +1,55 @@
+###########################################
+############# Cloud build #################
+###########################################
+
+# gcloud builds submit --config=cloudbuild.yaml --substitutions=TAG_NAME="prod.1.0.3"
+
+steps:
+
+- id: 'tag/branch name'
+  name: 'alpine'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+      echo "***********************"
+      echo "BRANCH NAME $BRANCH_NAME"
+      echo "***********************"
+
+# [START tflint]
+- id: 'tflint'
+  name: 'ghcr.io/terraform-linters/tflint'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - >
+    cd terraform_training/TP10
+    find . -type d -exec tflint
+    --only=terraform_deprecated_interpolation
+    --only=terraform_deprecated_index
+    --only=terraform_unused_declarations
+    --only=terraform_comment_syntax
+    --only=terraform_documented_outputs
+    --only=terraform_documented_variables
+    --only=terraform_typed_variables
+    --only=terraform_module_pinned_source
+    --only=terraform_naming_convention
+    --only=terraform_required_version
+    --only=terraform_required_providers
+    --only=terraform_standard_module_structure
+    --only=terraform_workspace_remote
+    '{}' \;
+# [END tflint]
+
+# [START tf-plan]
+- id: 'tf plan'
+  name: 'hashicorp/terraform:latest'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+      cd terraform_training/TP10
+      terraform init
+      terraform plan
+# [END tf-plan]
+tags: ['terraform', 'pr-to-main', 'tf-training']

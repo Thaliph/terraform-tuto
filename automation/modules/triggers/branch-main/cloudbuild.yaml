@@ -1,0 +1,41 @@
+###########################################
+############# Cloud build #################
+###########################################
+
+# gcloud builds submit --config=cloudbuild.yaml --substitutions=TAG_NAME="prod.1.0.3"
+
+steps:
+# Use cloud build default substitutions to print the branch name
+- id: 'tag/branch name'
+  name: 'alpine'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+      echo "***********************"
+      echo "BRANCH NAME $BRANCH_NAME"
+      echo "***********************"
+
+# [START tf-init]
+- id: 'tf init'
+  name: 'hashicorp/terraform:latest'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+      cd terraform_training/TP10
+      terraform init
+# [END tf-init]
+
+# [START tf-apply]
+- id: 'tf apply'
+  name: 'hashicorp/terraform:latest'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+      cd terraform_training/TP10
+      terraform apply -auto-approve
+# [END tf-apply]
+
+tags: ['terraform', 'main', 'tf-training']
