@@ -32,7 +32,10 @@ gcloud auth login --no-launch-browser
 **TIPS :** don't forget to change `PROJECT_ID` with the one you will use
 ## Deploy resource
 
-<walkthrough-editor-select-regex filePath="basic/main.tf">TEXT</walkthrough-editor-select-regex>
+<walkthrough-editor-open-file
+    filePath="cloudshell_open/terraform-tuto/basic/main.tf">
+    open a file for editing
+</walkthrough-editor-open-file>
 
 See the configuration of your network then it is time to **deploy** it!
 
