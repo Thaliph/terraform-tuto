@@ -20,6 +20,7 @@ In this tutorial we will see :
 ## Basic
 <walkthrough-editor-open-file filePath="basic/">
 </walkthrough-editor-open-file>
+
 ### Deploy resource
 
 ### Use variable
