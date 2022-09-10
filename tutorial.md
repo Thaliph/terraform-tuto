@@ -48,6 +48,8 @@ First, go to the basic repo
 cd basic
 ```
 
+***
+
 Initialize the basic working directory
 ```bash
 terraform init
@@ -71,8 +73,47 @@ terraform apply
 > you can re-use the plan command to see if terraform wants to make any new changes
 
 ## Use variable
+See the<walkthrough-editor-open-file
+    filePath="cloudshell_open/terraform-tuto/basic/main.tf">
+    configuration
+</walkthrough-editor-open-file> of your network and the instance then it is time to **deploy** it!
+
+First, go to the basic repo
+```bash
+cd basic
+```
+***
 ## Destroy resource
+First, go to the basic repo
+```bash
+cd basic
+```
+***
 ## Format our terraform
+First, go to the basic repo
+```bash
+cd basic
+```
+***
+Make some choas in our file :
+```bash
+find . -type f -name "main.tf" -exec sed -i "s/ /   /g" {} +   
+```
+
+Check the modification in the <walkthrough-editor-open-file
+    filePath="cloudshell_open/terraform-tuto/basic/main.tf">
+    configuration
+</walkthrough-editor-open-file> file... Unreadable!
+
+You can try the fmt commande
+```bash
+terraform fmt
+```
+
+Check the modification in the <walkthrough-editor-open-file
+    filePath="cloudshell_open/terraform-tuto/basic/main.tf">
+    configuration
+</walkthrough-editor-open-file> file... Beautiful!
 ## Try the console
 ## Import some resource
 ## Configure backend
