@@ -36,16 +36,25 @@ gcloud auth login --no-launch-browser
 ./setup_project.sh <walkthrough-project-name/>
 ```
 **TIPS :** don't forget to change `PROJECT_ID` with the one you will use
+## Basics
+Summary
+- deploy resource
+- use variable
+- destroy resource
+- format our terraform
+- try the console
+- import some resource
+- configure backend
 ## Deploy resource
 
 See the <walkthrough-editor-open-file
-    filePath="cloudshell_open/terraform-tuto/basic/main.tf">
+    filePath="cloudshell_open/terraform-tuto/working_dir/main.tf">
     configuration
 </walkthrough-editor-open-file> of your network and the instance then it is time to **deploy** it!
 
-First, go to the basic repo
+First, go to the working_dir repo
 ```bash
-cd basic
+cd working_dir
 ```
 
 ***
@@ -76,13 +85,13 @@ You can see your [Compute Engine](https://console.cloud.google.com/compute/insta
 
 ## Use variable
 See the <walkthrough-editor-open-file
-    filePath="cloudshell_open/terraform-tuto/basic/main.tf">
+    filePath="cloudshell_open/terraform-tuto/working_dir/main.tf">
     configuration
 </walkthrough-editor-open-file> of your network and the instance then it is time to **deploy** it!
 
-First, go to the basic repo
+First, go to the working_dir repo
 ```bash
-cd basic
+cd working_dir
 ```
 ***
 
@@ -93,7 +102,7 @@ touch terraform.tfvars
 ```
 
 In the <walkthrough-editor-open-file
-    filePath="cloudshell_open/terraform-tuto/basic/main.tf">
+    filePath="cloudshell_open/terraform-tuto/working_dir/main.tf">
     main.tf
 </walkthrough-editor-open-file> file, let's change the resource google_compute_network as below :
 
@@ -104,7 +113,7 @@ resource "google_compute_network" "vpc_network" {
 ```
 
 Change the <walkthrough-editor-open-file
-    filePath="cloudshell_open/terraform-tuto/basic/variables.tf">
+    filePath="cloudshell_open/terraform-tuto/working_dir/variables.tf">
     variables.tf
 </walkthrough-editor-open-file> and add a vpc name
 
@@ -117,7 +126,7 @@ variable "vpc_name"{
 ```
 
 and specify the value of `vpc_name` in the <walkthrough-editor-open-file
-    filePath="cloudshell_open/terraform-tuto/basic/terraform.tfvars">
+    filePath="cloudshell_open/terraform-tuto/working_dir/terraform.tfvars">
     terraform.tfvars
 </walkthrough-editor-open-file> 
 
@@ -130,9 +139,9 @@ vpc_name = "custom-vpc-network"
 You can notice that the plan won't change anything; we have the same configuration than before.
 
 ## Destroy resource
-First, go to the basic repo
+First, go to the working_dir repo
 ```bash
-cd basic
+cd working_dir
 ```
 ***
 
@@ -143,9 +152,9 @@ terraform destroy
 
 You can see your [Compute Engine](https://console.cloud.google.com/compute/instances?project=<walkthrough-project-name/>)  and your [Virtual Private Network](https://console.cloud.google.com/networking/networks/list?referrer=search&project=<walkthrough-project-name/>) has been destroyed.
 ## Format our terraform
-First, go to the basic repo
+First, go to the working_dir repo
 ```bash
-cd basic
+cd working_dir
 ```
 ***
 Make some choas in our file :
@@ -154,7 +163,7 @@ find . -type f -name "main.tf" -exec sed -i "s/ /   /g" {} +
 ```
 
 Check the modification in the <walkthrough-editor-open-file
-    filePath="cloudshell_open/terraform-tuto/basic/main.tf">
+    filePath="cloudshell_open/terraform-tuto/working_dir/main.tf">
     configuration
 </walkthrough-editor-open-file> file... Unreadable!
 
@@ -164,13 +173,13 @@ terraform fmt
 ```
 
 Check the modification in the <walkthrough-editor-open-file
-    filePath="cloudshell_open/terraform-tuto/basic/main.tf">
+    filePath="cloudshell_open/terraform-tuto/working_dir/main.tf">
     configuration
 </walkthrough-editor-open-file> file... Beautiful!
 ## Try the console
-First, go to the basic repo
+First, go to the working_dir repo
 ```bash
-cd basic
+cd working_dir
 ```
 and redeploy your infrastructrue
 ```bash
@@ -193,15 +202,15 @@ echo 'resource.google_compute_instance.default.labels' | terraform console
 echo 'resource.google_compute_network.vpc_network.name' | terraform console
 ```
 ## Import some resource
-First, go to the basic repo
+First, go to the working_dir repo
 ```bash
-cd basic
+cd working_dir
 ```
 and [create a resource manually](https://console.cloud.google.com/compute/instances?project=<walkthrough-project-name/>) that you will name `test-instance-1` and deploy it in `europe-west1-b`
 ***
 
 Add a new `google_compute_instance` in <walkthrough-editor-open-file
-    filePath="cloudshell_open/terraform-tuto/basic/main.tf">
+    filePath="cloudshell_open/terraform-tuto/working_dir/main.tf">
     main.tf
 </walkthrough-editor-open-file>
 
@@ -276,9 +285,9 @@ First, create a bucket to be used as your backend
 ./setup_bucket.sh <walkthrough-project-name/>
 ```
 
-and go to the basic repo
+and go to the working_dir repo
 ```bash
-cd basic
+cd working_dir
 ```
 ***
 
@@ -329,6 +338,14 @@ cat default.tfstate
 ```
 
 **Notice :** If you have press `yes`, the state is copied and the `cat` command will show your actual state.
+
+## Advance
+Summary
+- create a module
+- use expression
+- compare remote state datasource with data source
+## Create a module
+
 ## Félicitations !
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
