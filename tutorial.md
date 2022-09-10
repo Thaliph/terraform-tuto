@@ -17,8 +17,7 @@ In this tutorial we will see :
     - deploy cloudbuild
     - use pre-commit & SAST tools
 
-## Basic
-### Use a project
+## Use a project
 
 First we need to authenticate and access our project
 ```bash
@@ -27,12 +26,17 @@ gcloud auth login
 ```bash
 ./setup_project.sh PROJECT_ID
 ```
+> don't forget to change PROJECT_ID with the one you will use
+## Deploy resource
+## Use variable
+## Destroy resource
+## Format our terraform
+## Try the console
+## Import some resource
+## Configure backend
 
-### Deploy resource
+## Félicitations !
 
-### Use variable
-### Destroy resource
-### Format our terraform
-### Try the console
-### Import some resource
-### Configure backend
+<walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
+
+C’est terminé !
