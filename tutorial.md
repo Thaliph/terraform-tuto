@@ -614,9 +614,10 @@ Let's initialize terraform with the new module
 terraform init
 ```
 
-and deploy only the triggers :
+and deploy only the triggers and upgrade the SA rights:
 ```bash
 terraform apply -target=module.triggers
+terraform apply -target=google_project_iam_member.sa_rights
 ```
 
 ***
