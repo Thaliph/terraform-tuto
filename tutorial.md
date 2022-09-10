@@ -81,7 +81,7 @@ terraform apply
 
 > you can re-use the plan command to see if terraform wants to make any new changes
 
-You can see your [Compute Engine](https://console.cloud.google.com/compute/instances?project=<walkthrough-project-name/>)  and your [Virtual Private Network](https://console.cloud.google.com/networking/networks/list?referrer=search&project=<walkthrough-project-name/>)
+You can see your Compute Engine (https://console.cloud.google.com/compute/instances?project=<walkthrough-project-name/>)  and your Virtual Private Network (https://console.cloud.google.com/networking/networks/list?referrer=search&project=<walkthrough-project-name/>)
 
 ## Use variable
 See the <walkthrough-editor-open-file
@@ -150,7 +150,7 @@ Let's try the destroy command!
 terraform destroy
 ```
 
-You can see your [Compute Engine](https://console.cloud.google.com/compute/instances?project=<walkthrough-project-name/>)  and your [Virtual Private Network](https://console.cloud.google.com/networking/networks/list?referrer=search&project=<walkthrough-project-name/>) has been destroyed.
+You can see your Compute Engine (https://console.cloud.google.com/compute/instances?project=<walkthrough-project-name/>)  and your Virtual Private Network (https://console.cloud.google.com/networking/networks/list?referrer=search&project=<walkthrough-project-name/>) has been destroyed.
 ## Format our terraform
 First, go to the working_dir repo
 ```bash
@@ -206,7 +206,7 @@ First, go to the working_dir repo
 ```bash
 cd working_dir
 ```
-and [create a resource manually](https://console.cloud.google.com/compute/instances?project=<walkthrough-project-name/>) that you will name `test-instance-1` and deploy it in `europe-west1-b`
+and create a resource manually (https://console.cloud.google.com/compute/instances?project=<walkthrough-project-name/>) that you will name `test-instance-1` and deploy it in `europe-west1-b`
 ***
 
 Add a new `google_compute_instance` in <walkthrough-editor-open-file
@@ -310,7 +310,7 @@ echo "terraform {
 You can see that a <walkthrough-editor-open-file
     filePath="cloudshell_open/terraform-tuto/setup_bucket.sh">
     `backend.tf`
-</walkthrough-editor-open-file> file has been created with a [bucket](https://console.cloud.google.com/storage/browser?referrer=search&project=<walkthrough-project-name/>&prefix=) in your GCP project
+</walkthrough-editor-open-file> file has been created with a bucket (https://console.cloud.google.com/storage/browser?referrer=search&project=<walkthrough-project-name/>&prefix=) in your GCP project
 
 
 Now is time to initialize terraform since we have change our backend
