@@ -32,7 +32,8 @@ data "google_project" "project" {
 }
 
 resource "google_project_iam_member" "sa_rights" {
+  for_each = toset(["roles/iam.serviceAccountAdmin", "roles/compute.admin"])
   project = data.google_project.project.project_id
-  role    = "roles/compute.admin"
+  role    = each.value
   member  = "serviceAccount:${local.cloudbuild_sa}"
 }
