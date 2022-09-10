@@ -285,7 +285,7 @@ Terraform is now managing the instance
 ## Configure backend
 First, create a bucket to be used as your backend
 ```bash
-./setup_bucket.sh <walkthrough-project-name/> | bash
+export BUCKET_NAME=$(./setup_bucket.sh <walkthrough-project-name/>)
 ```
 
 and go to the working_dir repo
@@ -523,7 +523,7 @@ module "backend"{
 ```
 - <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/variables.tf">variables.tf</walkthrough-editor-open-file>
 ```bash
-touch varibales.tf
+touch variables.tf
 ```
 ```tf
 variable "machine_list"{
@@ -599,10 +599,6 @@ done
 Move to the repo and add all to our repo
 ```bash
 cd my-iac
-git config --global user.email "you@example.com"
-git config --global user.name "Your Name"
-git add .
-git commit -m "init"
 ```
 
 You should look into the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/my-iac/triggers.tf">triggers.tf</walkthrough-editor-open-file> and the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/my-iac/modules/triggers/main.tf">main.tf</walkthrough-editor-open-file>
@@ -626,7 +622,11 @@ We will try Cloudbuild with the 3 triggers we just added
 
 Let's get a feature branch
 ```bash
+git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
 git checkout -b feature/add-instance
+git add .
+git commit -m "init"
 ```
 
 Make a change in the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/my-iac/modules/backend/main.tf">main.tf</walkthrough-editor-open-file>:
@@ -660,7 +660,7 @@ eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 brew install pre-commit tfsec terraform-docs checkov tflint
 ```
 - Perform `pre-commit install` in your git repository to add the hook in the .git directory
-- Add the following as you pre-commit hook
+- Add the following as you pre-commit hook : `.pre-commit-config.yaml`
 ```yaml
 repos:
   - repo: git://github.com/antonbabenko/pre-commit-terraform
