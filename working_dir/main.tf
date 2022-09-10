@@ -1,9 +1,3 @@
-provider "google" {
-  project = "PROJECT_ID"
-  region  = "europe-west1"
-  zone    = "europe-west1-b"
-}
-
 resource "google_compute_subnetwork" "custom_subnet" {
   name          = "custom-subnetwork"
   ip_cidr_range = "10.2.0.0/16"
