@@ -23,7 +23,7 @@ steps:
   args:
   - '-c'
   - |
-      cd terraform_training/TP10
+      cd my-iac
       terraform init
 # [END tf-init]
 
@@ -34,7 +34,7 @@ steps:
   args:
   - '-c'
   - |
-      cd terraform_training/TP10
+      cd my-iac
       terraform apply -auto-approve
 # [END tf-apply]
 
