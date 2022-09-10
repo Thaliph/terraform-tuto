@@ -38,7 +38,7 @@ gcloud auth login --no-launch-browser
 **TIPS :** don't forget to change `PROJECT_ID` with the one you will use
 ## Deploy resource
 
-See the<walkthrough-editor-open-file
+See the <walkthrough-editor-open-file
     filePath="cloudshell_open/terraform-tuto/basic/main.tf">
     configuration
 </walkthrough-editor-open-file> of your network and the instance then it is time to **deploy** it!
@@ -72,8 +72,10 @@ terraform apply
 
 > you can re-use the plan command to see if terraform wants to make any new changes
 
+You can see your [Compute Engine](https://console.cloud.google.com/compute/instances?project=<walkthrough-project-name/>)  and your [Virtual Private Network](https://console.cloud.google.com/networking/networks/list?referrer=search&project=<walkthrough-project-name/>)
+
 ## Use variable
-See the<walkthrough-editor-open-file
+See the <walkthrough-editor-open-file
     filePath="cloudshell_open/terraform-tuto/basic/main.tf">
     configuration
 </walkthrough-editor-open-file> of your network and the instance then it is time to **deploy** it!
@@ -83,12 +85,63 @@ First, go to the basic repo
 cd basic
 ```
 ***
+
+Time to use the file `variables.tf` and create `terraform.tfvars`!
+
+```bash
+touch terraform.tfvars
+```
+
+In the <walkthrough-editor-open-file
+    filePath="cloudshell_open/terraform-tuto/basic/main.tf">
+    main.tf
+</walkthrough-editor-open-file> file, let's change the resource google_compute_network as below :
+
+```tf
+resource "google_compute_network" "vpc_network" {
+  name = var.vpc_name
+}
+```
+
+Change the <walkthrough-editor-open-file
+    filePath="cloudshell_open/terraform-tuto/basic/variables.tf">
+    variables.tf
+</walkthrough-editor-open-file> and add a vpc name
+
+```tf
+variable "vpc_name"{
+  type = string
+  description = "The name of my custom vpc network"
+  default = "custom-vpc"
+}
+```
+
+and specify the value of `vpc_name` in the <walkthrough-editor-open-file
+    filePath="cloudshell_open/terraform-tuto/basic/terraform.tfvars">
+    terraform.tfvars
+</walkthrough-editor-open-file> 
+
+```tf
+vpc_name = "custom-vpc-network"
+```
+
+***
+
+You can notice that the plan won't change anything; we have the same configuration than before.
+
 ## Destroy resource
 First, go to the basic repo
 ```bash
 cd basic
 ```
 ***
+
+Let's try the destroy command!
+```bash
+terraform destroy
+```
+
+You can see your [Compute Engine](https://console.cloud.google.com/compute/instances?project=<walkthrough-project-name/>)  and your [Virtual Private Network](https://console.cloud.google.com/networking/networks/list?referrer=search&project=<walkthrough-project-name/>) has been destroyed.
 ## Format our terraform
 First, go to the basic repo
 ```bash
