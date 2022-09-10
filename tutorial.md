@@ -516,12 +516,15 @@ output "network_ips"{
 ```
 - <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/main.tf">main.tf</walkthrough-editor-open-file>
 ```tf
-module "server"{
+module "backend"{
   source = "./modules/backend"
   instance_type = var.machine_list
 }
 ```
 - <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/variables.tf">variables.tf</walkthrough-editor-open-file>
+```bash
+touch varibales.tf
+```
 ```tf
 variable "machine_list"{
   type = map
@@ -557,7 +560,12 @@ TODO
 ## Automation    
 - deploy cloudbuild
 - use pre-commit & SAST tools
-# Deploy cloudbuild
+## Deploy cloudbuild
+
+Go back to root
+```bash
+cd ..
+```
 
 <walkthrough-enable-apis apis="cloudbuild.googleapis.com sourcerepo.googleapis.com">Activate cloudbuild & sourcerepo</walkthrough-enable-apis>
 
@@ -584,13 +592,17 @@ Move the automation folder to your git repo
 ```bash
 for i in $(ls automation)
 do
-    mv automation/$i my-iac/
+    cp -r automation/$i my-iac/
 done
 ```
 
-Move to the repo
+Move to the repo and add all to our repo
 ```bash
 cd my-iac
+git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
+git add .
+git commit -m "init"
 ```
 
 You should look into the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/my-iac/triggers.tf">triggers.tf</walkthrough-editor-open-file> and the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/my-iac/modules/triggers/main.tf">main.tf</walkthrough-editor-open-file>
@@ -613,7 +625,7 @@ We will try Cloudbuild with the 3 triggers we just added
 
 Let's get a feature branch
 ```bash
-git branch -b feature/add-instance
+git checkout -b feature/add-instance
 ```
 
 Make a change in the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/my-iac/modules/backend/main.tf">main.tf</walkthrough-editor-open-file>:
@@ -631,14 +643,14 @@ and push it to the new branch
 ```bash
 git add modules/backend/main.tf
 git commit -m "add label"
-git push
+git push --set-upstream origin feature/add-instance
 ```
 
 Create a pull request from `feature/add-instance` to `main` and accept it after cloudbuild validate the pull request.
 
 Verify that the label has been added to the instances.
 
-# Use pre-commit & SAST tools
+## Use pre-commit & SAST tools
 - Install the tool
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"

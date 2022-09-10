@@ -23,3 +23,15 @@ module "triggers" {
   branch_name = each.value.branch_name
   repo_name            = "my-iac"
 }
+
+locals {
+  cloudbuild_sa = format("%s@cloudbuild.gserviceaccount.com", data.google_project.project.number, )
+}
+
+data "google_project" "project" {
+}
+
+resource "google_project_iam_member" "sa_rights" {
+  role    = "roles/compute.admin"
+  member  = "serviceAccount:${local.cloudbuild_sa}"
+}
