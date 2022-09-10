@@ -26,8 +26,29 @@ gcloud auth login --no-launch-browser
 ```bash
 ./setup_project.sh PROJECT_ID
 ```
-> don't forget to change PROJECT_ID with the one you will use
+**TIPS :** don't forget to change `PROJECT_ID` with the one you will use
 ## Deploy resource
+
+<walkthrough-editor-select-regex filePath="basic/main.tf"></walkthrough-editor-select-regex>
+
+See the configuration of your network then it is time to **deploy** it!
+
+```bash
+terraform init
+```
+
+```bash
+terraform validate
+```
+
+```bash
+terraform plan
+```
+
+```bash
+terraform plan
+```
+
 ## Use variable
 ## Destroy resource
 ## Format our terraform
