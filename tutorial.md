@@ -23,7 +23,7 @@ In this tutorial we will see :
 
 First we need to authenticate and access our project
 ```bash
-gcloud auth login --no-launch-browser
+gcloud auth application-default login --no-launch-browser
 ```
 
 
@@ -435,6 +435,19 @@ Outputs:
 
 network_ip = "X.X.X.X"
 ```
+## Use expression
+First, go to the working_dir repo
+```bash
+cd working_dir
+```
+
+and destroy your infra
+```bash
+terraform destroy
+```
+***
+
+The goal is to 
 ## Félicitations !
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
