@@ -21,7 +21,7 @@ In this tutorial we will see :
 
 First we need to authenticate and access our project
 ```bash
-gcloud auth login
+gcloud auth login --no-launch-browser
 ```
 ```bash
 ./setup_project.sh PROJECT_ID
