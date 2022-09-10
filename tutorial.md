@@ -271,7 +271,64 @@ terraform apply
 
 Terraform is now managing the instance
 ## Configure backend
+First, create a bucket to be used as your backend
+```bash
+./setup_bucket.sh <walkthrough-project-name/>
+```
 
+and go to the basic repo
+```bash
+cd basic
+```
+***
+
+Create a new file `backend.tf` and fill it with :
+```bash
+echo "terraform {            
+  backend \"gcs\" {
+    bucket  = \"$BUCKET_NAME\"
+    prefix  = \"terraform/state\"
+
+  }
+}
+" > backend.tf
+```
+**Notice :** `BUCKET_NAME` is define in the <walkthrough-editor-open-file
+    filePath="cloudshell_open/terraform-tuto/setup_bucket.sh">
+    setup script
+</walkthrough-editor-open-file>
+
+You can see that a <walkthrough-editor-open-file
+    filePath="cloudshell_open/terraform-tuto/setup_bucket.sh">
+    `backend.tf`
+</walkthrough-editor-open-file> file has been created with a [bucket](https://console.cloud.google.com/storage/browser?referrer=search&project=<walkthrough-project-name/>&prefix=) in your GCP project
+
+
+Now is time to initialize terraform since we have change our backend
+```bash
+terraform init
+```
+
+output :
+```bash
+Initializing the backend...
+Do you want to copy existing state to the new backend?
+  Pre-existing state was found while migrating the previous "local" backend to the
+  newly configured "gcs" backend. No existing state was found in the newly
+  configured "gcs" backend. Do you want to copy this state to the new "gcs"
+  backend? Enter "yes" to copy and "no" to start with an empty state.
+
+  Enter a value: yes
+```
+
+Now you can go to your bucket to see your state in `terraform/state/` or directly by using the gsutil tool
+
+```bash
+gsutil cp gs://$BUCKET_NAME/terraform/state/default.tfstate .      
+cat default.tfstate   
+```
+
+**Notice :** If you have press `yes`, the state is copied and the `cat` command will show your actual state.
 ## Félicitations !
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
