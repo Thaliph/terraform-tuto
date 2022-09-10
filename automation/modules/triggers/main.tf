@@ -26,7 +26,7 @@ resource "google_cloudbuild_trigger" "trigger" {
     timeouts {}
 
     trigger_template {
-        invert_regex = true
+        invert_regex = false
         project_id   = var.project_id
         repo_name    = var.repo_name
         branch_name  = var.branch_name
