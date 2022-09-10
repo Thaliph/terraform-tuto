@@ -26,34 +26,49 @@ First we need to authenticate and access our project
 gcloud auth login --no-launch-browser
 ```
 
+
+<walkthrough-editor-open-file
+    filePath="cloudshell_open/terraform-tuto/setup_project.sh">
+    check script
+</walkthrough-editor-open-file>
+
 ```bash
 ./setup_project.sh <walkthrough-project-name/>
 ```
 **TIPS :** don't forget to change `PROJECT_ID` with the one you will use
 ## Deploy resource
 
-<walkthrough-editor-open-file
+See the<walkthrough-editor-open-file
     filePath="cloudshell_open/terraform-tuto/basic/main.tf">
-    open a file for editing
-</walkthrough-editor-open-file>
+    configuration
+</walkthrough-editor-open-file> of your network and the instance then it is time to **deploy** it!
 
-See the configuration of your network then it is time to **deploy** it!
+First, go to the basic repo
+```bash
+cd basic
+```
 
+Initialize the basic working directory
 ```bash
 terraform init
 ```
 
+Verify the content of the directory
 ```bash
 terraform validate
 ```
 
+Check what terraform wants to do
 ```bash
 terraform plan
 ```
 
+Apply your change
 ```bash
 terraform apply
 ```
+
+> you can re-use the plan command to see if terraform wants to make any new changes
 
 ## Use variable
 ## Destroy resource
