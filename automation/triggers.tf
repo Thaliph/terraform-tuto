@@ -32,6 +32,7 @@ data "google_project" "project" {
 }
 
 resource "google_project_iam_member" "sa_rights" {
+  project = data.google_project.project.project_id
   role    = "roles/compute.admin"
   member  = "serviceAccount:${local.cloudbuild_sa}"
 }
