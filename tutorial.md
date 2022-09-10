@@ -1,5 +1,5 @@
 # Terraform Tutorial
-
+## Introduction
 In this tutorial we will see :
 - basics
     - deploy resource
@@ -17,5 +17,14 @@ In this tutorial we will see :
     - deploy cloudbuild
     - use pre-commit & SAST tools
 
-<walkthrough-editor-open-file filePath="basic/tutoril-basic.md">
+## Basic
+<walkthrough-editor-open-file filePath="basic/">
 </walkthrough-editor-open-file>
+### Deploy resource
+
+### Use variable
+### Destroy resource
+### Format our terraform
+### Try the console
+### Import some resource
+### Configure backend
