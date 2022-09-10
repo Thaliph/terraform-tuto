@@ -215,7 +215,7 @@ Add a new `google_compute_instance` in <walkthrough-editor-open-file
 </walkthrough-editor-open-file>
 
 ```tf
-resource "google_compute_instance" "by-hand" {)
+resource "google_compute_instance" "by-hand" {}
 ```
 
 **Notice :** See that we change the `label name`; it is now `by-hand`
@@ -271,6 +271,7 @@ resource "google_compute_instance" "by-hand" {
       //   Ephemeral   IP
     }
   }
+}
 ```
 
 and apply it
@@ -279,10 +280,12 @@ terraform apply
 ```
 
 Terraform is now managing the instance
+
+**REMOVE THE RESOURCE google_compute_instance.by-hand from `main.tf`**
 ## Configure backend
 First, create a bucket to be used as your backend
 ```bash
-./setup_bucket.sh <walkthrough-project-name/>
+./setup_bucket.sh <walkthrough-project-name/> | bash
 ```
 
 and go to the working_dir repo
@@ -368,7 +371,8 @@ done
 Create a variable for the `machine_type` of your google_compute_instance resource
 ```bash
 find . -type f -name "main.tf" -exec sed -i "s/machine_type.*/machine_type = var\.instance_type/g" {} +
-echo "variable \"instance_type\" {
+echo "
+variable \"instance_type\" {
   type        = string
   description = \"Machine type e.g. e2-medium or custom-NUMBER_OF_CPUS-AMOUNT_OF_MEMORY_MB\"
 }
@@ -380,7 +384,7 @@ It has a `./modules/backend` source, `f1-micro` as `instance_type`.
 
 ```bash
 touch main.tf
-echo "module \"server\" {
+echo "module \"backend\" {
   source        = \"./modules/backend\"
   instance_type = \"f1-micro\"
 }
@@ -406,6 +410,8 @@ and we can see what it will do with and apply the change
 ```bash
 terraform apply
 ```
+
+**Tips :** we are destroying and creating a resource with the same name (network). It might fail, so, just re-apply if needed
 
 We can use outputs to have information about our resources.
 Let's try to get the `internal ip` used by our compute instance.
@@ -447,7 +453,97 @@ terraform destroy
 ```
 ***
 
-The goal is to 
+The goal is to create two google_instance_compute with a `for_each`
+* In <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/modules/backend/main.tf">modules/backend/main.tf</walkthrough-editor-open-file> file add a `for_each = var.instance_type` parameter in a resource block 
+* Replace `machine_type = var.instance_type` by `machine_type = each.value`
+* Replace `name = “instance-1”` by `name = “instance-${each.key}”`
+* In <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/modules/backend/variables.tf">modules/backend/variables.tf</walkthrough-editor-open-file> change `type=string` into `type=map`
+* In <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/main.tf">main.tf</walkthrough-editor-open-file> in root project replace `instance_type = “f1-micro”` by `instance_type = var.machine_list`
+* In <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/variables.tf">varibales.tf</walkthrough-editor-open-file> define a `machine_list` variable which is a map type variable
+* In <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/terraform.tfvars">terraform.tfvars</walkthrough-editor-open-file> define the value of instance_list: `instance_list = {“dev” = “f1-micro”, “prod” = “n1-standard-2”}`
+* Change outputs to correct values
+
+***
+
+Correction :
+- <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/modules/backend/main.tf">modules/backend/main.tf</walkthrough-editor-open-file>
+```tf
+resource "google_compute_instance" "default" {
+  for_each                  = var.instance_type
+  name                      = "instance-1-${each.key}"
+  machine_type              = each.value
+  zone                      = "europe-west1-b"
+  allow_stopping_for_update = true
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    network    = "default"
+
+    access_config {
+      // Ephemeral IP
+    }
+  }
+}
+```
+- <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/modules/backend/variables.tf">modules/backend/variables.tf</walkthrough-editor-open-file>
+```tf
+variable "instance_type"{
+  type = map
+}
+
+variable "vpc_name"{
+  type = string
+  description = "The name of my custom vpc network"
+  default = "custom-vpc"
+}
+```
+- <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/modules/backend/outputs.tf">modules/backend/outputs.tf</walkthrough-editor-open-file>
+```tf
+output "network_ips"{
+  value       = [ for instance in google_compute_instance.default :  instance.network_interface.0.network_ip ]
+}
+```
+- <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/main.tf">main.tf</walkthrough-editor-open-file>
+```tf
+module "server"{
+  source = "./modules/backend"
+  instance_type = var.machine_list
+}
+```
+- <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/variables.tf">variables.tf</walkthrough-editor-open-file>
+```tf
+variable "machine_list"{
+  type = map
+  description = "A map of different type of machine for dev and prod environment"
+}
+```
+- <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/terraform.tfvars">terraform.tfvars</walkthrough-editor-open-file>
+```tf
+machine_list = {
+  "dev"  = "f1-micro",
+  "prod" = "n1-standard-2"
+}
+```
+- <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/outputs.tf">outputs.tf</walkthrough-editor-open-file>
+```tf
+output "network_ips"{
+  value       = module.backend.network_ips
+}
+```
+
+***
+
+You can apply to create two instances. You will have a new output with a list of ips.
+
+```bash
+terraform apply
+```
+
 ## Félicitations !
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
