@@ -570,7 +570,7 @@ Clone a git repo
 ```bash
 gcloud source repos clone my-iac
 ```
-Move your `working_dir` to you git repo
+Move your `working_dir` to your git repo
 
 ```bash
 for i in $(ls working_dir)
@@ -579,8 +579,132 @@ do
 done
 ```
 
+Move the automation folder to your git repo
+
+```bash
+for i in $(ls automation)
+do
+    mv automation/$i my-iac/
+done
+```
+
+Move to the repo
+```bash
+cd my-iac
+```
+
+You should look into the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/my-iac/triggers.tf">triggers.tf</walkthrough-editor-open-file> and the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/my-iac/modules/triggers/main.tf">main.tf</walkthrough-editor-open-file>
+
+***
+
+Let's initialize terraform with the new module
+```bash
+terraform init
+```
+
+and deploy only the triggers :
+```bash
+terraform apply -target=module.triggers
+```
+
+***
+
+We will try Cloudbuild with the 3 triggers we just added
+
+Let's get a feature branch
+```bash
+git branch -b feature/add-instance
+```
+
+Make a change in the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/my-iac/modules/backend/main.tf">main.tf</walkthrough-editor-open-file>:
+```tf
+resource "google_compute_instance" "default" {
+    [...]
+    labels = {
+        "label" : "test"
+    }
+    [...]
+}
+```
+
+and push it to the new branch
+```bash
+git add modules/backend/main.tf
+git commit -m "add label"
+git push
+```
+
+Create a pull request from `feature/add-instance` to `main` and accept it after cloudbuild validate the pull request.
+
+Verify that the label has been added to the instances.
 
 # Use pre-commit & SAST tools
+- Install the tool
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)' >> $HOME/.profile
+eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+brew install pre-commit tfsec terraform-docs checkov tflint
+```
+- Perform `pre-commit install` in your git repository to add the hook in the .git directory
+- Add the following as you pre-commit hook
+```yaml
+repos:
+  - repo: git://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.45.0
+    hooks:
+      # Ensure terraform code is properly indented
+      - id: terraform_fmt
+      # Generate automatic documentation
+      - id: terraform_docs
+      # Perform security check
+      - id: terraform_tfsec
+      #- id: checkov
+      # Check terraform conventions
+      - id: terraform_tflint
+        args:
+          - '--args=--only=terraform_deprecated_interpolation'
+          - '--args=--only=terraform_deprecated_index'
+          - '--args=--only=terraform_unused_declarations'
+          - '--args=--only=terraform_comment_syntax'
+          - '--args=--only=terraform_documented_outputs'
+          - '--args=--only=terraform_documented_variables'
+          - '--args=--only=terraform_typed_variables'
+          - '--args=--only=terraform_module_pinned_source'
+          - '--args=--only=terraform_naming_convention'
+          - '--args=--only=terraform_required_version'
+          - '--args=--only=terraform_required_providers'
+          - '--args=--only=terraform_standard_module_structure'
+          - '--args=--only=terraform_workspace_remote'
+  - repo: meta
+    hooks:
+      - id: check-useless-excludes
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0  # Use the ref you want to point at
+    hooks:
+      # Remove useless whitespaces
+      - id: trailing-whitespace
+      # Prevent to add large binary in repo
+      - id: check-added-large-files
+      # Check json syntax
+      - id: check-json
+      # Check yaml syntax
+      - id: check-yaml
+      # Prevent to push private keys
+      - id: detect-private-key
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 2.1.4
+    hooks:
+      # Check for shell script mistakes
+      - id: shellcheck
+        additional_dependencies: []
+      # Ensure shell script is properly indented
+      - id: shfmt
+```
+- Trigger manually pre-commit with the command: `pre-commit run --all-files`
+- Read issues and try to do a remediation
+- Commit your change `git commit -am '[VM] enable shielded VM`and observe automatic trigger of pre-commit pipeline
+- Check also the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/my-iac/README.md">README.md</walkthrough-editor-open-file> file, documentation should been added automatically
 ## Félicitations !
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
