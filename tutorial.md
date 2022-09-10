@@ -16,3 +16,6 @@ In this tutorial we will see :
 - automation    
     - deploy cloudbuild
     - use pre-commit & SAST tools
+
+<walkthrough-editor-open-file filePath="basic/tutoril-basic.md">
+</walkthrough-editor-open-file>
