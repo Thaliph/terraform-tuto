@@ -19,17 +19,20 @@ In this tutorial we will see :
 
 ## Use a project
 
+<walkthrough-project-setup></walkthrough-project-setup>
+
 First we need to authenticate and access our project
 ```bash
 gcloud auth login --no-launch-browser
 ```
+
 ```bash
-./setup_project.sh PROJECT_ID
+./setup_project.sh <walkthrough-project-name/>
 ```
 **TIPS :** don't forget to change `PROJECT_ID` with the one you will use
 ## Deploy resource
 
-<walkthrough-editor-select-regex filePath="basic/main.tf"></walkthrough-editor-select-regex>
+<walkthrough-editor-select-regex filePath="basic/main.tf">TEXT</walkthrough-editor-select-regex>
 
 See the configuration of your network then it is time to **deploy** it!
 
@@ -46,7 +49,7 @@ terraform plan
 ```
 
 ```bash
-terraform plan
+terraform apply
 ```
 
 ## Use variable
