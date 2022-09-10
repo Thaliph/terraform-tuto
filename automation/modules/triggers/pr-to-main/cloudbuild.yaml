@@ -23,7 +23,6 @@ steps:
   args:
   - '-c'
   - >
-    cd my-iac
     find . -type d -exec tflint
     --only=terraform_deprecated_interpolation
     --only=terraform_deprecated_index
@@ -48,7 +47,6 @@ steps:
   args:
   - '-c'
   - |
-      cd my-iac
       terraform init
       terraform plan
 # [END tf-plan]
