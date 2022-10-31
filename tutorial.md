@@ -95,6 +95,24 @@ cd working_dir
 ```
 ***
 
+### Exercice :
+- create new files `terraform.tfvars`
+- define the variable `vpc_name` with a `string` type
+- use the variable for the name of your network resource
+- give the value `custom-vpc-network` to the varibale `vpc_name`
+
+## Use variable - Correction
+See the <walkthrough-editor-open-file
+    filePath="cloudshell_open/terraform-tuto/working_dir/main.tf">
+    configuration
+</walkthrough-editor-open-file> of your network and the instance then it is time to **deploy** it!
+
+First, go to the working_dir repo
+```bash
+cd working_dir
+```
+***
+
 Time to use the file `variables.tf` and create `terraform.tfvars`!
 
 ```bash
@@ -201,7 +219,21 @@ echo 'resource.google_compute_instance.default.labels' | terraform console
 ```bash
 echo 'resource.google_compute_network.vpc_network.name' | terraform console
 ```
+
 ## Import some resource
+First, go to the working_dir repo
+```bash
+cd working_dir
+```
+***
+
+### Exercice :
+- create a resource manually (https://console.cloud.google.com/compute/instances?project=<walkthrough-project-name/>) with
+  - name : `test-instance-1`
+  - zone : `europe-west1-b`
+- initialize a new compute instance resource
+- import the manual resource to your new terraform resource (https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance#import)
+## Import some resource - Correction
 First, go to the working_dir repo
 ```bash
 cd working_dir
@@ -224,7 +256,13 @@ Let's import the resource :
 ```bash
 terraform import google_compute_instance.by-hand <walkthrough-project-name/>/europe-west1-b/test-instance-1
 ```
+## Import some resource - Next Step
+First, go to the working_dir repo
+```bash
+cd working_dir
+```
 ***
+
 Let's make some changes :
 ```tf
 resource "google_compute_instance" "by-hand" {
@@ -300,7 +338,6 @@ echo "terraform {
   backend \"gcs\" {
     bucket  = \"$BUCKET_NAME\"
     prefix  = \"terraform/state\"
-
   }
 }
 " > backend.tf
@@ -354,6 +391,20 @@ Summary
 - use expression
 - compare remote state datasource with data source
 ## Create a module
+First, go to the working_dir repo
+```bash
+cd working_dir
+```
+***
+
+### Exercice :
+- Create a new folder `modules/backend` abd add your previous `main.tf`, `outputs.tf` and `variables.tf` in it
+- Create a variable for the `machine_type` of your google_compute_instance resource
+- In the root project, create a `main.tf` and create a module block named `backend` with `f1-micro` as `instance_type`.
+- create outputs to find the internal ip of our compute instance
+  1. get the network_id from the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/modules/backend/outputs.tf">module backend</walkthrough-editor-open-file>
+  2. create an `outputs.tf` file in the root project add show the value network_ip from the `backend` module
+## Create a module - Correction
 First, go to the working_dir repo
 ```bash
 cd working_dir

@@ -14,7 +14,7 @@ resource "google_compute_instance" "default" {
   machine_type              = "f1-micro"
   zone                      = "europe-west1-b"
   allow_stopping_for_update = true
-
+  tags = ["private-app"]
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-11"
