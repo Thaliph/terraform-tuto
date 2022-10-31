@@ -3,10 +3,13 @@
 # CREATE THE STORAGE BUCKET FOR THE STATIC CONTENT
 # ------------------------------------------------------------------------------
 
+resource "random_uuid" "test" {
+}
+
 resource "google_storage_bucket" "static" {
   project = var.project
 
-  name          = "${var.name}-bucket"
+  name          = "${var.name}-bucket-${random_uuid.test.result}"
   location      = var.region
   storage_class = "STANDARD"
 

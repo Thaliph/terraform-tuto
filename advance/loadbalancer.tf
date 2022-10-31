@@ -22,7 +22,7 @@ resource "google_compute_target_http_proxy" "http" {
 resource "google_compute_global_forwarding_rule" "http" {
   project    = var.project
   name       = "${var.name}-http-rule"
-  target     = google_compute_target_http_proxy.http[0].self_link
+  target     = google_compute_target_http_proxy.http.self_link
   ip_address = google_compute_global_address.default.address
   port_range = "80"
 }

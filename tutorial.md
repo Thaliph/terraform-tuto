@@ -652,186 +652,192 @@ We will change the terraform to use an http application that will be loadbalance
 
 ## Compare remote state datasource with data source - Correction
 ### Working_Dir 
-- use a data source for the networking and change (https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_network) and use the `id` of the data instead of `default`
+- use a data source for the networking and change (https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_network) and use the `id` of the data instead of `default` - <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/main.tf">here</walkthrough-editor-open-file>
 
-From :
-```
-resource "google_compute_instance" "default" {
-  name                      = "instance-1"
-  machine_type              = "f1-micro"
-  zone                      = "europe-west1-b"
-  allow_stopping_for_update = true
-  tags = ["private-app"]
-  boot_disk {
-    initialize_params {
-      image = "debian-cloud/debian-11"
+  From :
+  ```
+  resource "google_compute_instance" "default" {
+    name                      = "instance-1"
+    machine_type              = "f1-micro"
+    zone                      = "europe-west1-b"
+    allow_stopping_for_update = true
+    tags = ["private-app"]
+    boot_disk {
+      initialize_params {
+        image = "debian-cloud/debian-11"
+      }
+    }
+
+    network_interface {
+      network    = google_compute_network.vpc_network.self_link
+      subnetwork = google_compute_subnetwork.custom_subnet.self_link
+
+      access_config {
+        //   Ephemeral   IP
+      }
     }
   }
-
-  network_interface {
-    network    = google_compute_network.vpc_network.self_link
-    subnetwork = google_compute_subnetwork.custom_subnet.self_link
-
-    access_config {
-      //   Ephemeral   IP
-    }
-  }
-}
-```
-To:
-```
-data "google_compute_network" "vpc_network" {
-  name = "default"
-}
-
-data "google_compute_subnetwork" "subnet" {
-  name   = "default"
-  region = "europe-west1"
-}
-
-resource "google_compute_instance" "default" {
-  name                      = "instance-1"
-  machine_type              = "f1-micro"
-  zone                      = "europe-west1-b"
-  allow_stopping_for_update = true
-  tags = ["private-app"]
-  boot_disk {
-    initialize_params {
-      image = "debian-cloud/debian-11"
-    }
+  ```
+  To:
+  ```
+  data "google_compute_network" "vpc_network" {
+    name = "default"
   }
 
-  network_interface {
-    network    = data.google_compute_network.vpc_network.id
-    subnetwork = google_compute_subnetwork.subnet.id
+  data "google_compute_subnetwork" "subnet" {
+    name   = "default"
+    region = "europe-west1"
+  }
 
-    access_config {
-      //   Ephemeral   IP
+  resource "google_compute_instance" "default" {
+    name                      = "instance-1"
+    machine_type              = "f1-micro"
+    zone                      = "europe-west1-b"
+    allow_stopping_for_update = true
+    tags = ["private-app"]
+    boot_disk {
+      initialize_params {
+        image = "debian-cloud/debian-11"
+      }
+    }
+
+    network_interface {
+      network    = data.google_compute_network.vpc_network.id
+      subnetwork = google_compute_subnetwork.subnet.id
+
+      access_config {
+        //   Ephemeral   IP
+      }
     }
   }
-}
-```
+  ```
 
 - create the startup script
-```bash
-cd modules
+  ```bash
+  cd modules/backend
 
-echo "#!/bin/bash -xe
+  cat <<TST > file.py
+  #!/bin/bash -xe
 
-apt-get update
-apt-get install -yq build-essential python-pip rsync
-pip install flask
+  apt-get update
+  apt-get install -yq build-essential python3-pip rsync
+  pip install flask
 
-mkdir /app
+  mkdir /app
 
-cat > /app/app.py <<'EOF'
-from flask import Flask
-app = Flask(__name__)
+  cat > /app/app.py <<'EOF'
+  from flask import Flask
+  app = Flask(__name__)
 
-@app.route('/api')
-def hello_api():
-  return 'Hello, api!'
+  @app.route('/api')
+  def hello_api():
+    return 'Hello, api!'
 
-app.run(host='0.0.0.0')
-EOF
+  if __name__ == '__main__':
+        app.run(host='0.0.0.0', port=5000)
+  EOF
 
-python /app/app.py &" > file.py
-```
-- link it to compute instance 
-```
-resource "google_compute_instance" "default" {
-  name                      = "instance-1"
-  machine_type              = "f1-micro"
-  zone                      = "europe-west1-b"
-  allow_stopping_for_update = true
-  tags = ["private-app"]
-  boot_disk {
-    initialize_params {
-      image = "debian-cloud/debian-11"
+  python /app/app.py &
+  TST
+  ```
+- link it to compute instance on <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/main.tf">main.tf</walkthrough-editor-open-file>
+  ```
+  resource "google_compute_instance" "default" {
+    name                      = "instance-1"
+    machine_type              = "f1-micro"
+    zone                      = "europe-west1-b"
+    allow_stopping_for_update = true
+    tags = ["private-app"]
+    boot_disk {
+      initialize_params {
+        image = "debian-cloud/debian-11"
+      }
+    }
+    metadata_startup_script = file("${path.module}/file.py")
+    network_interface {
+      network    = data.google_compute_network.vpc_network.id
+      subnetwork = data.google_compute_subnetwork.subnet.id
+
+      access_config {
+        //   Ephemeral   IP
+      }
     }
   }
-  metadata_startup_script = file("${path.module}/file.py")
-  network_interface {
-    network    = data.google_compute_network.vpc_network.id
-    subnetwork = google_compute_subnetwork.subnet.id
-
-    access_config {
-      //   Ephemeral   IP
-    }
-  }
-}
-```
+  ```
 - create an output to the instance ids
   1. get the instance_id from the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/modules/backend/outputs.tf">module backend</walkthrough-editor-open-file>
   ```bash
   echo "
   output \"instance_id\" {
     value = resource.google_compute_instance.default.id
-  }" >> modules/backend/outputs.tf
+  }" > modules/backend/outputs.tf
   ```
 
   2. Create an `outputs.tf` file in the root project add show the value instance_id from the `backend` module
   ```bash
-  touch outputs.tf
   echo "
   output \"instance_id\" {
     value = module.backend.instance_id
-  }" >> outputs.tf
+  }" > outputs.tf
   ```
 
 ### Advance
-- create a state datasource to the backend from `working_dir`
-```
-data "terraform_remote_state" "foo" {
-  backend = "gcs"
-  config = {
-    bucket  = \"$BUCKET_NAME\"
-    prefix  = \"terraform/state\"
+- create a state datasource to the backend from `working_dir` 
+  ```bash
+  cd ~/cloudshell_open/terraform-tuto/advance
+  echo "data \"terraform_remote_state\" \"foo\" {
+    backend = \"gcs\"
+    config = {
+      bucket  = \"$BUCKET_NAME\"
+      prefix  = \"terraform/state\"
+    }
   }
-}
-```
+  " > data.tf
+  ```
 
 **TIPS :** The `BUCKET_NAME` is the one you used when creating the backend config
 
-- use the outputs from the compute instances to fill the `instances` from the file `backend_service.tf`
+- use the outputs from the compute instances to fill the `instances` from the file <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/advance/backend_service.tf">`backend_service.tf`</walkthrough-editor-open-file>
 
-from :
-```
-resource "google_compute_instance_group" "api" {
-  project   = var.project
-  name      = "${var.name}-instance-group"
-  zone      = var.zone
-  instances = [google_compute_instance.api.self_link] #TODO : CHANGE with data
+  from :
+  ```
+  resource "google_compute_instance_group" "api" {
+    project   = var.project
+    name      = "${var.name}-instance-group"
+    zone      = var.zone
+    instances = [google_compute_instance.api.self_link] #TODO : CHANGE with data
 
-  lifecycle {
-    create_before_destroy = true
+    lifecycle {
+      create_before_destroy = true
+    }
+
+    named_port {
+      name = "http"
+      port = 5000
+    }
   }
+  ```
 
-  named_port {
-    name = "http"
-    port = 5000
+  to : 
+  ```
+  resource "google_compute_instance_group" "api" {
+    project   = var.project
+    name      = "${var.name}-instance-group"
+    zone      = var.zone
+    instances = [data.terraform_remote_state.foo.outputs.instance_id]
+
+    lifecycle {
+      create_before_destroy = true
+    }
+
+    named_port {
+      name = "http"
+      port = 5000
+    }
   }
-}
-```
+  ```
 
-to : 
-```
-resource "google_compute_instance_group" "api" {
-  project   = var.project
-  name      = "${var.name}-instance-group"
-  zone      = var.zone
-  instances = [data.terraform_remote_state.foo.outputs.instance_id]
-
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  named_port {
-    name = "http"
-    port = 5000
-  }
-}
-```
+### Now, you can init and apply your work!
 
 ## Félicitations !
 
