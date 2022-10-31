@@ -13,9 +13,6 @@ In this tutorial we will see :
     - create a module
     - use expression
     - compare remote state datasource with data source
-- automation    
-    - deploy cloudbuild
-    - use pre-commit & SAST tools
 
 ## Use a project
 
