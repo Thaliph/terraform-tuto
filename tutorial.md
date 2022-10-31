@@ -498,6 +498,7 @@ Outputs:
 
 network_ip = "X.X.X.X"
 ```
+
 ## Use expression
 First, go to the working_dir repo
 ```bash
@@ -519,7 +520,16 @@ The goal is to create two google_instance_compute with a `for_each`
 * In <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/variables.tf">varibales.tf</walkthrough-editor-open-file> define a `machine_list` variable which is a map type variable
 * In <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/terraform.tfvars">terraform.tfvars</walkthrough-editor-open-file> define the value of instance_list: `instance_list = {“dev” = “f1-micro”, “prod” = “n1-standard-2”}`
 * Change outputs to correct values
+## Use expression - Correction
+First, go to the working_dir repo
+```bash
+cd working_dir
+```
 
+and destroy your infra
+```bash
+terraform destroy
+```
 ***
 
 Correction :
@@ -531,6 +541,7 @@ resource "google_compute_instance" "default" {
   machine_type              = each.value
   zone                      = "europe-west1-b"
   allow_stopping_for_update = true
+  tags = ["private-app"]
 
   boot_disk {
     initialize_params {
@@ -607,168 +618,224 @@ terraform apply
 See you dev and prod VMs in : https://console.cloud.google.com/compute/instances?project=<walkthrough-project-name/>
 
 ## Compare remote state datasource with data source
-TODO
-## Automation    
-- deploy cloudbuild
-- use pre-commit & SAST tools
-## Deploy cloudbuild
+We will change the terraform to use an http application that will be loadbalanced
 
-Go back to root
-```bash
-cd ..
+- In working_dir
+  - use a data source for the networking and change (https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_network) and use the `id` of the data instead of `default`
+  - add a startup script (`metadata_startup_script`) on the compute instance with the following lines :
+    ```
+    #!/bin/bash -xe
+
+    apt-get update
+    apt-get install -yq build-essential python-pip rsync
+    pip install flask
+
+    mkdir /app
+
+    cat > /app/app.py <<'EOF'
+    from flask import Flask
+    app = Flask(__name__)
+
+    @app.route('/api')
+    def hello_api():
+      return 'Hello, api!'
+
+    app.run(host='0.0.0.0')
+    EOF
+
+    python /app/app.py &
+    ```
+  - create an output to the instance ids
+  - apply
+- In advance
+  - create a `terraform.tfvars` and fill it with the correct values
+  - create a state datasource to the backend from `working_dir`
+  - use the outputs from the compute instances to fill the `instances` from the file `backend_service.tf`
+  - apply
+
+## Compare remote state datasource with data source - Correction
+### Working_Dir 
+- use a data source for the networking and change (https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_network) and use the `id` of the data instead of `default`
+
+From :
 ```
-
-<walkthrough-enable-apis apis="cloudbuild.googleapis.com sourcerepo.googleapis.com">Activate cloudbuild & sourcerepo</walkthrough-enable-apis>
-
-Create a git repo
-```bash
-gcloud source repos create my-iac
-```
-
-Clone a git repo
-```bash
-gcloud source repos clone my-iac
-```
-Move your `working_dir` to your git repo
-
-```bash
-for i in $(ls working_dir)
-do
-    mv working_dir/$i my-iac/
-done
-```
-
-Move the automation folder to your git repo
-
-```bash
-for i in $(ls automation)
-do
-    cp -r automation/$i my-iac/
-done
-```
-
-Move to the repo and add all to our repo
-```bash
-cd my-iac
-```
-
-You should look into the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/my-iac/triggers.tf">triggers.tf</walkthrough-editor-open-file> and the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/my-iac/modules/triggers/main.tf">main.tf</walkthrough-editor-open-file>
-
-***
-
-Let's initialize terraform with the new module
-```bash
-terraform init
-```
-
-and deploy only the triggers and upgrade the SA rights:
-```bash
-terraform apply -target=module.triggers
-terraform apply -target=google_project_iam_member.sa_rights
-```
-
-***
-
-We will try Cloudbuild with the 3 triggers we just added
-
-Let's get a feature branch
-```bash
-git config --global user.email "you@example.com"
-git config --global user.name "Your Name"
-git checkout -b feature/add-instance
-git add .
-git commit -m "init"
-```
-
-Make a change in the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/my-iac/modules/backend/main.tf">main.tf</walkthrough-editor-open-file>:
-```tf
 resource "google_compute_instance" "default" {
-    [...]
-    labels = {
-        "label" : "test"
+  name                      = "instance-1"
+  machine_type              = "f1-micro"
+  zone                      = "europe-west1-b"
+  allow_stopping_for_update = true
+  tags = ["private-app"]
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
     }
-    [...]
+  }
+
+  network_interface {
+    network    = google_compute_network.vpc_network.self_link
+    subnetwork = google_compute_subnetwork.custom_subnet.self_link
+
+    access_config {
+      //   Ephemeral   IP
+    }
+  }
+}
+```
+To:
+```
+data "google_compute_network" "vpc_network" {
+  name = "default"
+}
+
+data "google_compute_subnetwork" "subnet" {
+  name   = "default"
+  region = "europe-west1"
+}
+
+resource "google_compute_instance" "default" {
+  name                      = "instance-1"
+  machine_type              = "f1-micro"
+  zone                      = "europe-west1-b"
+  allow_stopping_for_update = true
+  tags = ["private-app"]
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    network    = data.google_compute_network.vpc_network.id
+    subnetwork = google_compute_subnetwork.subnet.id
+
+    access_config {
+      //   Ephemeral   IP
+    }
+  }
 }
 ```
 
-and push it to the new branch
+- create the startup script
 ```bash
-git add modules/backend/main.tf
-git commit -m "add label"
-git push --set-upstream origin feature/add-instance
+cd modules
+
+echo "#!/bin/bash -xe
+
+apt-get update
+apt-get install -yq build-essential python-pip rsync
+pip install flask
+
+mkdir /app
+
+cat > /app/app.py <<'EOF'
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/api')
+def hello_api():
+  return 'Hello, api!'
+
+app.run(host='0.0.0.0')
+EOF
+
+python /app/app.py &" > file.py
+```
+- link it to compute instance 
+```
+resource "google_compute_instance" "default" {
+  name                      = "instance-1"
+  machine_type              = "f1-micro"
+  zone                      = "europe-west1-b"
+  allow_stopping_for_update = true
+  tags = ["private-app"]
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+  metadata_startup_script = file("${path.module}/file.py")
+  network_interface {
+    network    = data.google_compute_network.vpc_network.id
+    subnetwork = google_compute_subnetwork.subnet.id
+
+    access_config {
+      //   Ephemeral   IP
+    }
+  }
+}
+```
+- create an output to the instance ids
+  1. get the instance_id from the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/modules/backend/outputs.tf">module backend</walkthrough-editor-open-file>
+  ```bash
+  echo "
+  output \"instance_id\" {
+    value = resource.google_compute_instance.default.id
+  }" >> modules/backend/outputs.tf
+  ```
+
+  2. Create an `outputs.tf` file in the root project add show the value instance_id from the `backend` module
+  ```bash
+  touch outputs.tf
+  echo "
+  output \"instance_id\" {
+    value = module.backend.instance_id
+  }" >> outputs.tf
+  ```
+
+### Advance
+- create a state datasource to the backend from `working_dir`
+```
+data "terraform_remote_state" "foo" {
+  backend = "gcs"
+  config = {
+    bucket  = \"$BUCKET_NAME\"
+    prefix  = \"terraform/state\"
+  }
+}
 ```
 
-Create a pull request from `feature/add-instance` to `main` and accept it after cloudbuild validate the pull request.
+**TIPS :** The `BUCKET_NAME` is the one you used when creating the backend config
 
-Verify that the label has been added to the instances.
+- use the outputs from the compute instances to fill the `instances` from the file `backend_service.tf`
 
-## Use pre-commit & SAST tools
-- Install the tool
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)' >> $HOME/.profile
-eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-brew install pre-commit tfsec terraform-docs checkov tflint
+from :
 ```
-- Perform `pre-commit install` in your git repository to add the hook in the .git directory
-- Add the following as you pre-commit hook : `.pre-commit-config.yaml`
-```yaml
-repos:
-  - repo: git://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.45.0
-    hooks:
-      # Ensure terraform code is properly indented
-      - id: terraform_fmt
-      # Generate automatic documentation
-      - id: terraform_docs
-      # Perform security check
-      - id: terraform_tfsec
-      #- id: checkov
-      # Check terraform conventions
-      - id: terraform_tflint
-        args:
-          - '--args=--only=terraform_deprecated_interpolation'
-          - '--args=--only=terraform_deprecated_index'
-          - '--args=--only=terraform_unused_declarations'
-          - '--args=--only=terraform_comment_syntax'
-          - '--args=--only=terraform_documented_outputs'
-          - '--args=--only=terraform_documented_variables'
-          - '--args=--only=terraform_typed_variables'
-          - '--args=--only=terraform_module_pinned_source'
-          - '--args=--only=terraform_naming_convention'
-          - '--args=--only=terraform_required_version'
-          - '--args=--only=terraform_required_providers'
-          - '--args=--only=terraform_standard_module_structure'
-          - '--args=--only=terraform_workspace_remote'
-  - repo: meta
-    hooks:
-      - id: check-useless-excludes
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0  # Use the ref you want to point at
-    hooks:
-      # Remove useless whitespaces
-      - id: trailing-whitespace
-      # Prevent to add large binary in repo
-      - id: check-added-large-files
-      # Check json syntax
-      - id: check-json
-      # Check yaml syntax
-      - id: check-yaml
-      # Prevent to push private keys
-      - id: detect-private-key
-  - repo: https://github.com/jumanjihouse/pre-commit-hooks
-    rev: 2.1.4
-    hooks:
-      # Check for shell script mistakes
-      - id: shellcheck
-        additional_dependencies: []
-      # Ensure shell script is properly indented
-      - id: shfmt
+resource "google_compute_instance_group" "api" {
+  project   = var.project
+  name      = "${var.name}-instance-group"
+  zone      = var.zone
+  instances = [google_compute_instance.api.self_link] #TODO : CHANGE with data
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  named_port {
+    name = "http"
+    port = 5000
+  }
+}
 ```
-- Trigger manually pre-commit with the command: `pre-commit run --all-files`
-- Read issues and try to do a remediation
-- Commit your change `git commit -am '[VM] enable shielded VM`and observe automatic trigger of pre-commit pipeline
-- Check also the <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/my-iac/README.md">README.md</walkthrough-editor-open-file> file, documentation should been added automatically
+
+to : 
+```
+resource "google_compute_instance_group" "api" {
+  project   = var.project
+  name      = "${var.name}-instance-group"
+  zone      = var.zone
+  instances = [data.terraform_remote_state.foo.outputs.instance_id]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  named_port {
+    name = "http"
+    port = 5000
+  }
+}
+```
+
 ## Félicitations !
 
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
