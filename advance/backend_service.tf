@@ -19,6 +19,23 @@ resource "google_compute_backend_service" "api" {
   health_checks = [google_compute_health_check.default.self_link]
 }
 
+resource "google_compute_backend_service" "game" {
+  project = var.project
+
+  name        = "${var.name}-game"
+  description = "GAME Backend for ${var.name}"
+  port_name   = "game"
+  protocol    = "HTTP"
+  timeout_sec = 10
+  enable_cdn  = false
+
+  backend {
+    group = google_compute_instance_group.api.self_link
+  }
+
+  health_checks = [google_compute_health_check.default.self_link]
+}
+
 # ------------------------------------------------------------------------------
 # CREATE THE INSTANCE GROUP WITH A SINGLE INSTANCE AND THE BACKEND SERVICE CONFIGURATION
 # ------------------------------------------------------------------------------
@@ -36,6 +53,10 @@ resource "google_compute_instance_group" "api" {
   named_port {
     name = "http"
     port = 5000
+  }
+  named_port {
+    name = "game"
+    port = 8000
   }
 }
 

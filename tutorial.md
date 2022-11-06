@@ -623,11 +623,11 @@ We will change the terraform to use an http application that will be loadbalance
     ```
     #!/bin/bash -xe
 
-    apt-get update
-    apt-get install -yq build-essential python-pip rsync
-    pip install flask
+    sudo apt-get update
+    sudo apt-get install -yq build-essential python3-pip rsync apt-transport-https ca-certificates curl software-properties-common
+    sudo pip install flask
 
-    mkdir /app
+    sudo mkdir /app
 
     cat > /app/app.py <<'EOF'
     from flask import Flask
@@ -637,10 +637,20 @@ We will change the terraform to use an http application that will be loadbalance
     def hello_api():
       return 'Hello, api!'
 
-    app.run(host='0.0.0.0')
+    if __name__ == '__main__':
+      app.run(host='0.0.0.0', port=5000)
+    
     EOF
 
-    python /app/app.py &
+    python3 /app/app.py &
+
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+    sudo apt update
+    sudo apt install docker-ce -y
+
+    sudo docker run -p 8000:80 -d pengbai/docker-supermario
+    TST
     ```
   - create an output to the instance ids
   - apply
@@ -648,7 +658,9 @@ We will change the terraform to use an http application that will be loadbalance
   - create a `terraform.tfvars` and fill it with the correct values
   - create a state datasource to the backend from `working_dir`
   - use the outputs from the compute instances to fill the `instances` from the file `backend_service.tf`
-  - apply
+  - apply & test
+  - change the url map default service with the game backend service
+  - apply & test
 
 ## Compare remote state datasource with data source - Correction
 ### Working_Dir 
@@ -719,11 +731,11 @@ We will change the terraform to use an http application that will be loadbalance
   cat <<TST > file.py
   #!/bin/bash -xe
 
-  apt-get update
-  apt-get install -yq build-essential python3-pip rsync
-  pip install flask
+  sudo apt-get update
+  sudo apt-get install -yq build-essential python3-pip rsync apt-transport-https ca-certificates curl software-properties-common
+  sudo pip install flask
 
-  mkdir /app
+  sudo mkdir /app
 
   cat > /app/app.py <<'EOF'
   from flask import Flask
@@ -734,10 +746,18 @@ We will change the terraform to use an http application that will be loadbalance
     return 'Hello, api!'
 
   if __name__ == '__main__':
-        app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000)
+  
   EOF
 
-  python /app/app.py &
+  python3 /app/app.py &
+
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+  sudo apt update
+  sudo apt install docker-ce -y
+
+  sudo docker run -p 8000:80 -d pengbai/docker-supermario
   TST
   ```
 - link it to compute instance on <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/main.tf">main.tf</walkthrough-editor-open-file>
@@ -815,6 +835,10 @@ We will change the terraform to use an http application that will be loadbalance
       name = "http"
       port = 5000
     }
+    named_port {
+    name = "game"
+    port = 8000
+  }
   }
   ```
 
@@ -834,6 +858,10 @@ We will change the terraform to use an http application that will be loadbalance
       name = "http"
       port = 5000
     }
+    named_port {
+    name = "game"
+    port = 8000
+  }
   }
   ```
 

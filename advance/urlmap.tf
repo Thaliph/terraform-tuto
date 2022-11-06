@@ -9,6 +9,7 @@ resource "google_compute_url_map" "urlmap" {
   description = "URL map for ${var.name}"
 
   default_service = google_compute_backend_bucket.static.self_link
+  #default_service = google_compute_backend_service.api.self_link
 
   host_rule {
     hosts        = ["*"]
@@ -18,6 +19,7 @@ resource "google_compute_url_map" "urlmap" {
   path_matcher {
     name            = "all"
     default_service = google_compute_backend_bucket.static.self_link
+    #default_service = google_compute_backend_service.api.self_link
 
     path_rule {
       paths   = ["/api", "/api/*"]
