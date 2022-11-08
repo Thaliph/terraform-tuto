@@ -395,7 +395,7 @@ cd working_dir
 ***
 
 ### Exercice :
-- Create a new folder `modules/backend` abd add your previous `main.tf`, `outputs.tf` and `variables.tf` in it
+- Create a new folder `modules/backend` and add your previous `main.tf`, `outputs.tf` and `variables.tf` in it
 - Create a variable for the `machine_type` of your google_compute_instance resource
 - In the root project, create a `main.tf` and create a module block named `backend` with `f1-micro` as `instance_type`.
 - create outputs to find the internal ip of our compute instance
@@ -618,7 +618,7 @@ See you dev and prod VMs in : https://console.cloud.google.com/compute/instances
 We will change the terraform to use an http application that will be loadbalanced
 
 - In working_dir
-  - use a data source for the networking and change (https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_network) and use the `id` of the data instead of `default`
+  - use a data source for the networking (https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_network) and use the `id` of the data instead of `default`
   - add a startup script (`metadata_startup_script`) on the compute instance with the following lines :
     ```
     #!/bin/bash -xe
@@ -664,7 +664,7 @@ We will change the terraform to use an http application that will be loadbalance
 
 ## Compare remote state datasource with data source - Correction
 ### Working_Dir 
-- use a data source for the networking and change (https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_network) and use the `id` of the data instead of `default` - <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/main.tf">here</walkthrough-editor-open-file>
+- use a data source for the networking  (https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_network) and use the `id` of the data instead of `default` - <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/modules/backend/main.tf">here</walkthrough-editor-open-file>
 
   From :
   ```
@@ -760,7 +760,7 @@ We will change the terraform to use an http application that will be loadbalance
   sudo docker run -p 8000:80 -d pengbai/docker-supermario
   TST
   ```
-- link it to compute instance on <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/main.tf">main.tf</walkthrough-editor-open-file>
+- link it to compute instance on <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/modules/backend/main.tf">main.tf</walkthrough-editor-open-file>
   ```
   resource "google_compute_instance" "default" {
     name                      = "instance-1"
@@ -800,6 +800,10 @@ We will change the terraform to use an http application that will be loadbalance
     value = module.backend.instance_id
   }" > outputs.tf
   ```
+
+```bash
+terraform apply
+```
 
 ### Advance
 - create a state datasource to the backend from `working_dir` 
@@ -865,6 +869,10 @@ We will change the terraform to use an http application that will be loadbalance
   }
   ```
 
+```bash
+terraform init
+terraform apply
+```
 ### Now, you can init and apply your work!
 
 ## Félicitations !
