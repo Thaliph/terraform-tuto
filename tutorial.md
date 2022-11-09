@@ -649,7 +649,7 @@ We will change the terraform to use an http application that will be loadbalance
     sudo apt update
     sudo apt install docker-ce -y
 
-    sudo docker run -p 8000:80 -d pengbai/docker-supermario
+    sudo docker run -p 8000:8080 -d pengbai/docker-supermario
     TST
     ```
   - create an output to the instance ids
@@ -757,7 +757,7 @@ We will change the terraform to use an http application that will be loadbalance
   sudo apt update
   sudo apt install docker-ce -y
 
-  sudo docker run -p 8000:80 -d pengbai/docker-supermario
+  sudo docker run -p 8000:8080 -d pengbai/docker-supermario
   TST
   ```
 - link it to compute instance on <walkthrough-editor-open-file filePath="cloudshell_open/terraform-tuto/working_dir/modules/backend/main.tf">main.tf</walkthrough-editor-open-file>
